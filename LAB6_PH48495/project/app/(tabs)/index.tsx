@@ -56,7 +56,6 @@ const Item = ({ user, onUpdate, onDelete }: ItemProps) => {
       }
 
       const response = await api.put(`/users/${user.id}`, updatedData);
-      // Giả sử response trả về dữ liệu đã cập nhật
       onUpdate(response);
       setEditModalVisible(false);
     } catch (error) {
