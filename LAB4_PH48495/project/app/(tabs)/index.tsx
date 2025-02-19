@@ -9,7 +9,10 @@ import {
   Image,
   Modal,
   TextInput,
+<<<<<<< HEAD
   Alert,
+=======
+>>>>>>> 911d4bcd01a0787683f1ef92ae6a6c39ec308de4
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
@@ -51,6 +54,10 @@ const ContactItem = ({ contact, onEdit, onDelete }: ContactItemProps) => {
             style={styles.btnEdit}
             onPress={() => {
               setEditedContact(contact);
+<<<<<<< HEAD
+=======
+              setModalVisible(true);
+>>>>>>> 911d4bcd01a0787683f1ef92ae6a6c39ec308de4
             }}
           >
             <Text style={styles.editText}>Edit</Text>
@@ -161,6 +168,7 @@ export default function HomeScreen() {
   ]);
 
   const handleEdit = (email: string, updatedContact: ContactType) => {
+<<<<<<< HEAD
     //Validate
     if (updatedContact.name === '' || updatedContact.position === '' || updatedContact.photo === '') {
       Alert.alert('Error', 'Please fill all fields');
@@ -172,6 +180,13 @@ export default function HomeScreen() {
     newContacts[index] = updatedContact;
 
     setContacts(newContacts);
+=======
+    setContacts((prevContacts) =>
+      prevContacts.map((contact) =>
+        contact.email === email ? updatedContact : contact
+      )
+    );
+>>>>>>> 911d4bcd01a0787683f1ef92ae6a6c39ec308de4
   };
 
   const handleDelete = (email: string) => {
@@ -300,4 +315,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 911d4bcd01a0787683f1ef92ae6a6c39ec308de4
