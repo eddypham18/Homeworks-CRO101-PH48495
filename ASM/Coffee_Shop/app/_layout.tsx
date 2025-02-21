@@ -2,29 +2,33 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import {
-  NavigationContainer,
-  DarkTheme,
-  DefaultTheme,
-} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import 'react-native-reanimated';
-
-import LoginScreen from './(tabs)/LoginScreen';
-import RegisterScreen from './(tabs)/RegisterScreen';
-import HomeScreen from './(tabs)/HomeScreen';
-import DetailsScreen from './(tabs)/DetailsScreen';
+import TabNavigator from './navigators/TabNavigator';
+import DetailsScreen from './screens/DetailsScreen';
+import PaymentScreen from './screens/PaymentScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import ResetPassword from './screens/ResetPasswordScreen';
+import SettingScreen from './screens/SettingScreen';
+import PersonalDetailsScreens from './screens/PersonalDetailScreen';
 
 SplashScreen.preventAutoHideAsync();
 
 const Stack = createStackNavigator();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
-    Poppins: require('../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
+    app_icons: require('./assets/fonts/app_icons.ttf'),
+    'Poppins-Regular': require('./assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Bold': require('./assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Black': require('./assets/fonts/Poppins-Black.ttf'),
+    'Poppins-ExtraBold': require('./assets/fonts/Poppins-ExtraBold.ttf'),
+    'Poppins-ExtraLight': require('./assets/fonts/Poppins-ExtraLight.ttf'),
+    'Poppins-Light': require('./assets/fonts/Poppins-Light.ttf'),
+    'Poppins-Medium': require('./assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-SemiBold': require('./assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Thin': require('./assets/fonts/Poppins-Thin.ttf'),
   });
 
   useEffect(() => {
@@ -36,32 +40,53 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return null;
   }
-
   return (
     <>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName="Tab"
+      >
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ headerShown: false }}
-        />
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{ headerShown: false }}
-        />
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
+          name="ResetPassword"
+          component={ResetPassword}
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
         <Stack.Screen
-          name="Detail"
+          name="Tab"
+          component={TabNavigator}
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="Setting"
+          component={SettingScreen}
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="Details"
           component={DetailsScreen}
-          options={{ headerShown: false }}
-        />
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="Payment"
+          component={PaymentScreen}
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
+        <Stack.Screen
+          name="PersonalDetail"
+          component={PersonalDetailsScreens}
+          options={{ animation: 'slide_from_bottom' }}
+        ></Stack.Screen>
       </Stack.Navigator>
-      <StatusBar style="auto" />
     </>
   );
 }
