@@ -19,7 +19,6 @@ import PaymentMethod from '../components/PaymentMethod';
 import PaymentFooter from '../components/PaymentFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomIcon from '../components/CustomIcon';
-import { useStore } from '../store/store';
 import PopUpAnimation from '../components/PopUpAnimation';
 
 const PaymentList = [

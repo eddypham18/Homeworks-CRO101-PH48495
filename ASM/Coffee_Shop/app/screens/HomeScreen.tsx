@@ -25,6 +25,7 @@ import CustomIcon from '../components/CustomIcon';
 import CoffeeCard from '../components/CoffeeCard';
 import { api } from '../configs/api';
 import { assetsMapping } from '../configs/assetsMapping';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const getLocalImage = (key: string) => {
   return assetsMapping[key] || null;
@@ -139,8 +140,8 @@ const HomeScreen = ({ navigation }: any) => {
     setSearchText('');
   };
 
-  // Hàm xử lý logic thêm sản phẩm vào giỏ hàng sử dụng API và db.json
-  const addProductToCart = async (product: any) => {
+  // Hàm xử lý logic thêm sản phẩm vào giỏ hàng
+  const addProductToCart = async (product: any, selectedSize: string) => {
     try {
       const userId = await AsyncStorage.getItem('userId');
       if (!userId) {
@@ -151,101 +152,91 @@ const HomeScreen = ({ navigation }: any) => {
         );
         return;
       }
-      // Gọi API lấy giỏ hàng của người dùng
-      api
-        .get(`/cart?userId=${userId}`, {})
-        .then((res: any) => {
-          let cart = res.data[0];
-          if (!cart) {
-            // Nếu chưa có giỏ hàng, tạo giỏ hàng mới
-            const newCart = {
-              userId: userId,
-              items: [
-                {
-                  productId: product.id,
-                  quantity: 1,
-                  name: product.name,
-                  price: product.prices[2].price,
-                  currency: product.prices[2].currency,
-                },
-              ],
-            };
-            api
-              .post('/cart', newCart, {})
-              .then(() => {
-                ToastAndroid.showWithGravity(
-                  `${product.name} added to cart`,
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER
-                );
-              })
-              .catch((err: any) => {
-                console.error(err);
-                ToastAndroid.showWithGravity(
-                  'Failed to add product to cart',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER
-                );
-              });
-          } else {
-            // Nếu giỏ hàng đã tồn tại, kiểm tra sản phẩm có trong giỏ chưa
-            const index = cart.items.findIndex(
-              (item: any) => item.productId === product.id
-            );
-            let updatedItems;
-            if (index >= 0) {
-              // Nếu sản phẩm đã có, tăng quantity
-              updatedItems = cart.items.map((item: any, i: number) =>
-                i === index ? { ...item, quantity: item.quantity + 1 } : item
-              );
-            } else {
-              // Nếu chưa có, thêm sản phẩm mới vào giỏ
-              updatedItems = [
-                ...cart.items,
-                {
-                  productId: product.id,
-                  quantity: 1,
-                  name: product.name,
-                  price: product.prices[2].price,
-                  currency: product.prices[2].currency,
-                },
-              ];
-            }
-            api
-              .patch(`/cart/${cart.id}`, { items: updatedItems }, {})
-              .then(() => {
-                ToastAndroid.showWithGravity(
-                  `${product.name} added to cart`,
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER
-                );
-              })
-              .catch((err: any) => {
-                console.error(err);
-                ToastAndroid.showWithGravity(
-                  'Failed to update cart',
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER
-                );
-              });
-          }
-        })
-        .catch((err: any) => {
-          console.error(err);
-          ToastAndroid.showWithGravity(
-            'Failed to fetch cart data',
-            ToastAndroid.SHORT,
-            ToastAndroid.CENTER
+
+      const res = await api.get(`/cart?userId=${userId}`, {});
+      let cart = res.data[0];
+
+      if (!cart) {
+        const newCart = {
+          userId: userId,
+          items: [
+            {
+              productId: product.id,
+              name: product.name,
+              roasted: product.roasted,
+              imagelink_square: product.imagelink_square,
+              special_ingredient: product.special_ingredient,
+              prices: product.prices.map((price: any) => ({
+                size: price.size,
+                price: price.price,
+                currency: price.currency,
+                quantity: price.size === selectedSize ? 1 : 0,
+              })),
+              type: product.type,
+              index: product.index,
+            },
+          ],
+        };
+
+        await api.post('/cart', newCart, {});
+        ToastAndroid.showWithGravity(
+          `${product.name} added to cart`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      } else {
+        const productIndex = cart.items.findIndex(
+          (item: any) => item.productId === product.id
+        );
+
+        if (productIndex >= 0) {
+          cart.items[productIndex].prices = cart.items[productIndex].prices.map(
+            (price: any) => ({
+              ...price,
+              quantity:
+                price.size === selectedSize
+                  ? (price.quantity || 0) + 1
+                  : price.quantity,
+            })
           );
-        });
+        } else {
+          cart.items.push({
+            productId: product.id,
+            name: product.name,
+            roasted: product.roasted,
+            imagelink_square: product.imagelink_square,
+            special_ingredient: product.special_ingredient,
+            prices: product.prices.map((price: any) => ({
+              size: price.size,
+              price: price.price,
+              currency: price.currency,
+              quantity: price.size === selectedSize ? 1 : 0,
+            })),
+            type: product.type,
+            index: product.index,
+          });
+        }
+
+        // Cập nhật giỏ hàng
+        await api.patch(`/cart/${cart.id}`, { items: cart.items }, {});
+        ToastAndroid.showWithGravity(
+          `${product.name} added to cart`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      }
     } catch (error) {
       console.error(error);
+      ToastAndroid.showWithGravity(
+        'Failed to update cart',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
     }
   };
 
-  // Hàm được gọi khi nhấn nút "Add to Cart" trong CoffeeCard
   const CoffeCardAddToCart = (product: any) => {
-    addProductToCart(product);
+    addProductToCart(product, 'L');
   };
 
   return (

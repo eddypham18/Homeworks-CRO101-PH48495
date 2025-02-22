@@ -1,10 +1,10 @@
 {
   "users": [
     {
-      "id": "U1",
-      "name": "John Doe",
+      "name": "John Doe 4",
       "email": "a@a.a",
-      "password": "123456"
+      "password": "123123",
+      "id": "U1"
     },
     {
       "id": "U2",
@@ -32,10 +32,91 @@
       "items": [
         {
           "productId": "C1",
-          "quantity": 1,
           "name": "Americano",
-          "price": "4.29",
-          "currency": "$"
+          "roasted": "Medium Roasted",
+          "imagelink_square": 33,
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 3
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 0
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 2
+            }
+          ],
+          "type": "Coffee",
+          "index": 0,
+          "quantity": null
+        },
+        {
+          "productId": "C7",
+          "name": "Cappucchino",
+          "roasted": "Medium Roasted",
+          "imagelink_square": "cappuccino_pic_1_square",
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 4
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 2
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 2
+            }
+          ],
+          "type": "Coffee",
+          "index": 6
+        },
+        {
+          "productId": "C4",
+          "name": "Black Coffee",
+          "roasted": "Medium Roasted",
+          "imagelink_square": 35,
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 0
+            }
+          ],
+          "type": "Coffee",
+          "index": 3
         }
       ]
     }
@@ -49,16 +130,29 @@
       "status": "completed"
     }
   ],
-  "favourites": [
-    {
-      "id": "F1",
-      "userId": "U1",
-      "productId": "C1"
-    },
+  "favorites": [
     {
       "id": "F2",
       "userId": "U1",
       "productId": "B2"
+    },
+    {
+      "id": "e773",
+      "userId": "U1",
+      "productId": "C13",
+      "productType": "Coffee"
+    },
+    {
+      "id": "7ae9",
+      "userId": "U1",
+      "productId": "C16",
+      "productType": "Coffee"
+    },
+    {
+      "id": "2fef",
+      "userId": "U1",
+      "productId": "C1",
+      "productType": "Coffee"
     }
   ],
   "beans": [

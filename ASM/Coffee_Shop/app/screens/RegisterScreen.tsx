@@ -11,6 +11,7 @@ import {
 import { COLORS, FONTFAMILY } from '../theme/theme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import api from '../configs/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 //Danh sách user
 interface User {
   id?: string;
@@ -124,7 +125,6 @@ const RegisterScreen = ({ navigation }: any) => {
       });
   };
 
-  //Lấy danh sách user từ API
   useEffect(() => {
     api
       .get('/users', {})

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   StatusBar,
   TouchableOpacity,
   TextInput,
+  ToastAndroid,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -18,6 +19,8 @@ import {
   BORDERRADIUS,
 } from '../theme/theme';
 import GradientBGIcon from '../components/GradientBGIcon';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../configs/api';
 
 export default function PersonalDetailScreen({ navigation }: any) {
   // States cho các trường nhập liệu
@@ -25,15 +28,24 @@ export default function PersonalDetailScreen({ navigation }: any) {
   const [nameIsFocused, setNameIsFocused] = useState(false);
   const [nameError, setNameError] = useState(false);
 
+  //email
   const [email, setEmail] = useState('');
   const [emailIsFocused, setEmailIsFocused] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
+  //pasword
   const [passwd, setPasswd] = useState('');
   const [passwdIsFocused, setPasswdIsFocused] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+  //new password
+  const [newPasswd, setNewPasswd] = useState('');
+  const [newPasswdIsFocused, setNewPasswdIsFocused] = useState(false);
+  const [newPasswordError, setNewPasswordError] = useState(false);
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+
+  //re-type
   const [reTypePasswd, setReTypePasswd] = useState('');
   const [rePasswdIsFocused, setRePasswdIsFocused] = useState(false);
   const [rePasswordError, setRePasswordError] = useState(false);
@@ -41,7 +53,30 @@ export default function PersonalDetailScreen({ navigation }: any) {
 
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleRegister = () => {
+  //Lấy dữ liệu dựa vào userId
+  const getUser = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await api.get(`/users/${userId}`, {});
+      return response.data;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const fillNameAndEmail = async () => {
+    const data = await getUser();
+    if (data) {
+      setName(data.name);
+      setEmail(data.email);
+    }
+  };
+
+  useEffect(() => {
+    fillNameAndEmail();
+  }, []);
+
+  const handleSave = () => {
     // Reset lỗi
     setNameError(false);
     setEmailError(false);
@@ -68,24 +103,66 @@ export default function PersonalDetailScreen({ navigation }: any) {
     }
 
     // Validate độ dài mật khẩu (ví dụ: tối thiểu 6 ký tự)
-    if (passwd.length < 6) {
+    if (newPasswd.length < 6) {
       setErrorMessage('Password must be at least 6 characters.');
-      setPasswordError(true);
+      setNewPasswordError(true);
       return;
     }
 
     // Kiểm tra mật khẩu và re-type password khớp nhau
-    if (passwd !== reTypePasswd) {
+    if (newPasswd !== reTypePasswd) {
       setErrorMessage('Passwords do not match.');
-      setPasswordError(true);
+      setNewPasswordError(true);
       setRePasswordError(true);
       return;
     }
 
+    //Kiểm tra mật khẩu có đúng với tài khoản không
+    const checkPassword = async () => {
+      const data = await getUser();
+      if (data) {
+        if (data.password !== passwd) {
+          setErrorMessage('Password is incorrect.');
+          setPasswordError(true);
+          return;
+        }
+      }
+    };
+    checkPassword();
+
     // Nếu mọi thứ hợp lệ, xóa thông báo lỗi
     setErrorMessage('');
-    // Ở đây bạn có thể gọi API cập nhật thông tin cá nhân hoặc điều hướng
-    // Ví dụ: navigation.navigate('ProfileUpdated');
+
+    // Gửi dữ liệu lên server
+    const saveData = async () => {
+      const userId = await AsyncStorage.getItem('userId');
+      try {
+        const res = await api.put(
+          `/users/${userId}`,
+          {
+            name,
+            email,
+            password: newPasswd,
+          },
+          {}
+        );
+        if (res) {
+          ToastAndroid.show('Saved successfully', ToastAndroid.SHORT);
+          setPasswd('');
+          setNewPasswd('');
+          setReTypePasswd('');
+          setNameError(false);
+          setNewPasswordError(false);
+          setPasswordError(false);
+          setRePasswordError(false);
+
+          fillNameAndEmail();
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    saveData();
   };
 
   return (
@@ -152,6 +229,7 @@ export default function PersonalDetailScreen({ navigation }: any) {
           onFocus={() => setEmailIsFocused(true)}
           onBlur={() => setEmailIsFocused(false)}
           keyboardType="email-address"
+          editable={false}
         />
 
         {/* Input Password */}
@@ -180,6 +258,38 @@ export default function PersonalDetailScreen({ navigation }: any) {
           >
             <Ionicons
               name={passwordVisible ? 'eye-off' : 'eye'}
+              size={24}
+              color={COLORS.secondaryLightGreyHex}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Input New - Password */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[
+              styles.textInput,
+              newPasswd !== ''
+                ? { fontFamily: FONTFAMILY.poppins_bold }
+                : { fontFamily: FONTFAMILY.poppins_regular },
+              newPasswordError
+                ? { borderColor: COLORS.primaryRedHex }
+                : { borderColor: COLORS.primaryGreyHex },
+            ]}
+            placeholder="New password"
+            placeholderTextColor={COLORS.secondaryLightGreyHex}
+            value={newPasswd}
+            onChangeText={setNewPasswd}
+            onFocus={() => setNewPasswdIsFocused(true)}
+            onBlur={() => setNewPasswdIsFocused(false)}
+            secureTextEntry={!newPasswordVisible}
+          />
+          <TouchableOpacity
+            onPress={() => setNewPasswordVisible(!newPasswordVisible)}
+            style={styles.iconEye}
+          >
+            <Ionicons
+              name={newPasswordVisible ? 'eye-off' : 'eye'}
               size={24}
               color={COLORS.secondaryLightGreyHex}
             />
@@ -225,12 +335,12 @@ export default function PersonalDetailScreen({ navigation }: any) {
           ) : null}
         </View>
 
-        {/* Button Register */}
+        {/* Button Save */}
         <TouchableOpacity
           style={[styles.styleButton, { marginTop: 40 }]}
-          onPress={handleRegister}
+          onPress={handleSave}
         >
-          <Text style={styles.textButton}>Register</Text>
+          <Text style={styles.textButton}>Save</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
