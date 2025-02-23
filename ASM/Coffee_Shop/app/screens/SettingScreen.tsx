@@ -92,7 +92,9 @@ const SettingScreen = ({ navigation, route }: any) => {
               <Icon name="credit-card" color={'#D17842'} size={20} />
             </View>
             <Text style={styles.styleText}>Payment Method</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Payment')}>
+            <TouchableOpacity
+              onPress={() => Alert.alert('This function under development!')}
+            >
               <Icon name="chevron-right" color={'#AEAEAE'} size={25} />
             </TouchableOpacity>
           </View>

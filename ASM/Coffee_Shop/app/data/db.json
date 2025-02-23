@@ -23,17 +23,38 @@
       "name": "Tien",
       "email": "t@t.t",
       "password": "123456"
+    },
+    {
+      "name": "thai",
+      "email": "t1@t.t",
+      "password": "123456",
+      "id": "c7e5"
     }
   ],
   "cart": [
     {
       "id": "CT1",
       "userId": "U1",
-      "items": [
+      "items": []
+    },
+    {
+      "id": "c580",
+      "userId": "c7e5",
+      "items": []
+    }
+  ],
+  "payments": [
+    {
+      "id": "08c3",
+      "userId": "U1",
+      "amount": 4.29,
+      "date": "23rd February 2025, 20:01",
+      "status": "completed",
+      "paymentMode": "Credit Card",
+      "details": [
         {
           "productId": "C1",
           "name": "Americano",
-          "roasted": "Medium Roasted",
           "imagelink_square": 33,
           "special_ingredient": "With Steamed Milk",
           "prices": [
@@ -41,7 +62,7 @@
               "size": "S",
               "price": "1.38",
               "currency": "$",
-              "quantity": 3
+              "quantity": 0
             },
             {
               "size": "M",
@@ -53,46 +74,53 @@
               "size": "L",
               "price": "4.29",
               "currency": "$",
-              "quantity": 2
+              "quantity": 1
             }
           ],
           "type": "Coffee",
-          "index": 0,
-          "quantity": null
-        },
+          "itemPrice": 4.29
+        }
+      ]
+    },
+    {
+      "id": "a0a9",
+      "userId": "c7e5",
+      "amount": 7.4399999999999995,
+      "date": "23rd February 2025, 20:45",
+      "status": "completed",
+      "paymentMode": "Credit Card",
+      "details": [
         {
-          "productId": "C7",
-          "name": "Cappucchino",
-          "roasted": "Medium Roasted",
-          "imagelink_square": "cappuccino_pic_1_square",
+          "productId": "C1",
+          "name": "Americano",
+          "imagelink_square": 33,
           "special_ingredient": "With Steamed Milk",
           "prices": [
             {
               "size": "S",
               "price": "1.38",
               "currency": "$",
-              "quantity": 4
+              "quantity": 0
             },
             {
               "size": "M",
               "price": "3.15",
               "currency": "$",
-              "quantity": 2
+              "quantity": 1
             },
             {
               "size": "L",
               "price": "4.29",
               "currency": "$",
-              "quantity": 2
+              "quantity": 0
             }
           ],
           "type": "Coffee",
-          "index": 6
+          "itemPrice": 3.15
         },
         {
           "productId": "C4",
           "name": "Black Coffee",
-          "roasted": "Medium Roasted",
           "imagelink_square": 35,
           "special_ingredient": "With Steamed Milk",
           "prices": [
@@ -100,59 +128,71 @@
               "size": "S",
               "price": "1.38",
               "currency": "$",
-              "quantity": 1
+              "quantity": 0
             },
             {
               "size": "M",
               "price": "3.15",
               "currency": "$",
-              "quantity": 1
+              "quantity": 0
             },
             {
               "size": "L",
               "price": "4.29",
               "currency": "$",
-              "quantity": 0
+              "quantity": 1
             }
           ],
           "type": "Coffee",
-          "index": 3
+          "itemPrice": 4.29
+        }
+      ]
+    },
+    {
+      "id": "c613",
+      "userId": "c7e5",
+      "amount": 29,
+      "date": "23rd February 2025, 20:48",
+      "status": "completed",
+      "paymentMode": "Wallet",
+      "details": [
+        {
+          "productId": "B4",
+          "name": "Excelsa Beans",
+          "imagelink_square": 31,
+          "special_ingredient": "From Malaysia",
+          "prices": [
+            {
+              "size": "250gm",
+              "price": "5.50",
+              "currency": "$",
+              "quantity": 0
+            },
+            {
+              "size": "500gm",
+              "price": "10.50",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "1Kg",
+              "price": "18.50",
+              "currency": "$",
+              "quantity": 1
+            }
+          ],
+          "type": "Bean",
+          "itemPrice": 29
         }
       ]
     }
   ],
-  "payments": [
-    {
-      "id": "P1",
-      "userId": "U1",
-      "amount": 29.97,
-      "date": "2023-02-21T12:00:00Z",
-      "status": "completed"
-    }
-  ],
   "favorites": [
     {
-      "id": "F2",
+      "id": "6e04",
       "userId": "U1",
-      "productId": "B2"
-    },
-    {
-      "id": "e773",
-      "userId": "U1",
-      "productId": "C13",
-      "productType": "Coffee"
-    },
-    {
-      "id": "7ae9",
-      "userId": "U1",
-      "productId": "C16",
-      "productType": "Coffee"
-    },
-    {
-      "id": "2fef",
-      "userId": "U1",
-      "productId": "C1",
-      "productType": "Coffee"
+      "productId": "B1",
+      "productType": "Bean"
     }
   ],
   "beans": [

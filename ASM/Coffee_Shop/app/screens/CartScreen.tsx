@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ToastAndroid,
-  FlatList,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -25,6 +25,10 @@ const CartScreen = ({ navigation }: any) => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [cartPrice, setCartPrice] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [productIdToDelete, setProductIdToDelete] = useState<string | null>(
+    null
+  );
   const tabBarHeight = useBottomTabBarHeight();
 
   // Hàm tính tổng giá của giỏ hàng
@@ -63,14 +67,14 @@ const CartScreen = ({ navigation }: any) => {
     }
   };
 
-  // Sử dụng useFocusEffect để re-fetch cart mỗi khi màn hình được focus
+  // useFocusEffect
   useFocusEffect(
     useCallback(() => {
       fetchCart();
     }, [])
   );
 
-  // Hàm tăng số lượng cho item với kích thước cụ thể
+  // Hàm tăng số lượng cho ite
   const incrementCartItemQuantityHandler = async (
     productId: string,
     size: string
@@ -97,7 +101,7 @@ const CartScreen = ({ navigation }: any) => {
     }
   };
 
-  // Hàm giảm số lượng cho item với kích thước cụ thể (đảm bảo không giảm dưới 1)
+  // Hàm giảm số lượng cho item
   const decrementCartItemQuantityHandler = async (
     productId: string,
     size: string
@@ -124,8 +128,27 @@ const CartScreen = ({ navigation }: any) => {
     }
   };
 
+  //Nút thanh toán
   const buttonPressHandler = () => {
-    navigation.push('Payment', { amount: cartPrice });
+    const details = [
+      ...cartItems.map((item) => {
+        return {
+          productId: item.productId,
+          name: item.name,
+          imagelink_square: item.imagelink_square,
+          special_ingredient: item.special_ingredient,
+          prices: item.prices,
+          type: item.type,
+          itemPrice: item.prices.reduce(
+            (sum: number, p: any) =>
+              sum + parseFloat(p.price) * (p.quantity || 0),
+            0
+          ),
+        };
+      }),
+    ];
+
+    navigation.push('Payment', { amount: cartPrice, details: details });
   };
 
   if (loading) {
@@ -135,6 +158,35 @@ const CartScreen = ({ navigation }: any) => {
       </View>
     );
   }
+
+  const deleteCartItemHandler = async (productId: string) => {
+    try {
+      if (!cart) return;
+
+      const updatedItems = cartItems.filter(
+        (item) => item.productId !== productId
+      );
+
+      await api.patch(`/cart/${cart.id}`, { items: updatedItems }, {});
+
+      setCartItems(updatedItems);
+      calculateCartPrice(updatedItems);
+      ToastAndroid.showWithGravity(
+        `Item was removed from cart`,
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } catch (error) {
+      console.error(error);
+      ToastAndroid.showWithGravity(
+        'Failed to remove item from cart',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } finally {
+      setProductIdToDelete(null);
+    }
+  };
 
   return (
     <View style={styles.ScreenContainer}>
@@ -158,11 +210,9 @@ const CartScreen = ({ navigation }: any) => {
                 {cartItems.map((data: any) => (
                   <TouchableOpacity
                     key={data.productId}
-                    onPress={() => {
-                      navigation.push('Details', {
-                        id: data.productId,
-                        type: data.productType,
-                      });
+                    onLongPress={() => {
+                      setModalVisible(true);
+                      setProductIdToDelete(data.productId);
                     }}
                   >
                     <CartItem
@@ -193,6 +243,41 @@ const CartScreen = ({ navigation }: any) => {
             />
           )}
         </View>
+
+        {/* Modal delete product */}
+        <Modal animationType="slide" transparent={true} visible={modalVisible}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalText}>
+                Are you sure want to remove this product from cart?
+              </Text>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.button, styles.noButton]}
+                  onPress={() => {
+                    setModalVisible(false);
+                    setProductIdToDelete(null);
+                  }}
+                >
+                  <Text style={styles.noText}>No</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.button, styles.yesButton]}
+                  onPress={() => {
+                    if (productIdToDelete) {
+                      deleteCartItemHandler(productIdToDelete);
+                    }
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.yesText}>Yes</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -222,6 +307,53 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryBlackHex,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  modalContainer: {
+    width: 300,
+    backgroundColor: '#121212',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  noButton: {
+    backgroundColor: 'transparent',
+  },
+  yesButton: {
+    backgroundColor: '#D47F4E',
+    marginLeft: 10,
+  },
+  noText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  yesText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

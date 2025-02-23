@@ -9,7 +9,6 @@ import {
   View,
   ToastAndroid,
   FlatList,
-  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -25,7 +24,6 @@ import CustomIcon from '../components/CustomIcon';
 import CoffeeCard from '../components/CoffeeCard';
 import { api } from '../configs/api';
 import { assetsMapping } from '../configs/assetsMapping';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 const getLocalImage = (key: string) => {
   return assetsMapping[key] || null;
@@ -72,7 +70,7 @@ const HomeScreen = ({ navigation }: any) => {
   const ListRef = useRef<FlatList>(null);
   const tabBarHeight = useBottomTabBarHeight();
 
-  // Kiểm tra nếu người dùng chưa đăng nhập -> chuyển hướng về Login
+  // Kiểm tra nếu người dùng ddawng nhaapj chuaw
   useEffect(() => {
     const checkLogin = async () => {
       const userId = await AsyncStorage.getItem('userId');

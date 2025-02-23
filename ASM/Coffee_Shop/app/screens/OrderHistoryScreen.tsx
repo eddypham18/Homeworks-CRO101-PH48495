@@ -1,3 +1,4 @@
+import React, { useState, useCallback } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -5,10 +6,13 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
-import React, { useState } from 'react';
-import { useStore } from '../store/store';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../configs/api';
 import {
   BORDERRADIUS,
   COLORS,
@@ -22,17 +26,34 @@ import PopUpAnimation from '../components/PopUpAnimation';
 import OrderHistoryCard from '../components/OrderHistoryCard';
 
 const OrderHistoryScreen = ({ navigation }: any) => {
-  const OrderHistoryList = useStore((state: any) => state.OrderHistoryList);
   const tabBarHeight = useBottomTabBarHeight();
+  const [orderHistoryList, setOrderHistoryList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAnimation, setShowAnimation] = useState(false);
 
-  const navigationHandler = ({ index, id, type }: any) => {
-    navigation.push('Details', {
-      index,
-      id,
-      type,
-    });
+  const fetchOrderHistory = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const res = await api.get(`/payments?userId=${userId}`, {});
+      setOrderHistoryList(res.data);
+    } catch (error) {
+      console.error(error);
+      ToastAndroid.showWithGravity(
+        'Failed to load order history',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchOrderHistory();
+    }, [])
+  );
 
   const buttonPressHandler = () => {
     setShowAnimation(true);
@@ -41,20 +62,26 @@ const OrderHistoryScreen = ({ navigation }: any) => {
     }, 2000);
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primaryOrangeHex} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.ScreenContainer}>
       <StatusBar
         backgroundColor={COLORS.primaryBlackHex}
-        barStyle={'light-content'}
+        barStyle="light-content"
       />
 
-      {showAnimation ? (
+      {showAnimation && (
         <PopUpAnimation
           style={styles.LottieAnimation}
           source={require('../lottie/download.json')}
         />
-      ) : (
-        <></>
       )}
 
       <ScrollView
@@ -66,34 +93,28 @@ const OrderHistoryScreen = ({ navigation }: any) => {
         >
           <View style={styles.ItemContainer}>
             <HeaderBar title="Order History" navigation={navigation} />
-
-            {OrderHistoryList.length == 0 ? (
-              <EmptyListAnimation title={'No Order History'} />
+            {orderHistoryList.length === 0 ? (
+              <EmptyListAnimation title="No Order History" />
             ) : (
               <View style={styles.ListItemContainer}>
-                {OrderHistoryList.map((data: any, index: any) => (
+                {orderHistoryList.map((data: any, index: number) => (
                   <OrderHistoryCard
                     key={index.toString()}
-                    navigationHandler={navigationHandler}
-                    CartList={data.CartList}
-                    CartListPrice={data.CartListPrice}
-                    OrderDate={data.OrderDate}
+                    details={data.details}
+                    amount={data.amount.toFixed(2)}
+                    OrderDate={data.date}
                   />
                 ))}
               </View>
             )}
           </View>
-          {OrderHistoryList.length > 0 ? (
+          {orderHistoryList.length > 0 && (
             <TouchableOpacity
               style={styles.DownloadButton}
-              onPress={() => {
-                buttonPressHandler();
-              }}
+              onPress={buttonPressHandler}
             >
               <Text style={styles.ButtonText}>Download</Text>
             </TouchableOpacity>
-          ) : (
-            <></>
           )}
         </View>
       </ScrollView>
@@ -105,6 +126,12 @@ const styles = StyleSheet.create({
   ScreenContainer: {
     flex: 1,
     backgroundColor: COLORS.primaryBlackHex,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.primaryBlackHex,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   LottieAnimation: {
     height: 250,

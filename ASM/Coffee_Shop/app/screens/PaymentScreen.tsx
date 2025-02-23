@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   BORDERRADIUS,
   COLORS,
@@ -20,6 +21,7 @@ import PaymentFooter from '../components/PaymentFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import CustomIcon from '../components/CustomIcon';
 import PopUpAnimation from '../components/PopUpAnimation';
+import { api } from '../configs/api';
 
 const PaymentList = [
   {
@@ -44,19 +46,54 @@ const PaymentList = [
   },
 ];
 
-const PaymentScreen = ({ navigation, route }: any) => {
-  const calculateCartPrice = useStore((state: any) => state.calculateCartPrice);
-  const addToOrderHistoryListFromCart = useStore(
-    (state: any) => state.addToOrderHistoryListFromCart
-  );
+// Hàm định dạng ngày tháng năm theo kiểu "20th March 2023, 14:05"
+const formatDate = (date: Date): string => {
+  const day = date.getDate();
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  let suffix = 'th';
+  if (day % 10 === 1 && day % 100 !== 11) {
+    suffix = 'st';
+  } else if (day % 10 === 2 && day % 100 !== 12) {
+    suffix = 'nd';
+  } else if (day % 10 === 3 && day % 100 !== 13) {
+    suffix = 'rd';
+  }
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const formattedHours = hours < 10 ? `0${hours}` : hours;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${day}${suffix} ${month} ${year}, ${formattedHours}:${formattedMinutes}`;
+};
 
+const PaymentScreen = ({ navigation, route }: any) => {
   const [paymentMode, setPaymentMode] = useState('Credit Card');
   const [showAnimation, setShowAnimation] = useState(false);
 
-  const buttonPressHandler = () => {
+  const handlePayment = async () => {
     setShowAnimation(true);
-    addToOrderHistoryListFromCart();
-    calculateCartPrice();
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      const paymentData = {
+        userId: userId || '',
+        amount: route.params.amount,
+        date: formatDate(new Date()),
+        status: 'completed',
+        paymentMode,
+        details: route.params.details,
+      };
+      // Gửi dữ liệu thanh toán lên server
+      await api.post('/payments', paymentData, {});
+
+      // Sau khi đặt hàng thành công, lấy cart của user và xóa hết các sản phẩm trong giỏ hàng
+      const cartRes = await api.get(`/cart?userId=${userId}`, {});
+      if (cartRes.data && cartRes.data.length > 0) {
+        const cart = cartRes.data[0];
+        await api.patch(`/cart/${cart.id}`, { items: [] }, {});
+      }
+    } catch (error) {
+      console.error(error);
+    }
     setTimeout(() => {
       setShowAnimation(false);
       navigation.navigate('Tab', { screen: 'History' });
@@ -67,16 +104,14 @@ const PaymentScreen = ({ navigation, route }: any) => {
     <View style={styles.ScreenContainer}>
       <StatusBar
         backgroundColor={COLORS.primaryBlackHex}
-        barStyle={'light-content'}
+        barStyle="light-content"
       />
 
-      {showAnimation ? (
+      {showAnimation && (
         <PopUpAnimation
           style={styles.LottieAnimation}
           source={require('../lottie/successful.json')}
         />
-      ) : (
-        <></>
       )}
 
       <ScrollView
@@ -84,11 +119,7 @@ const PaymentScreen = ({ navigation, route }: any) => {
         contentContainerStyle={styles.ScrollViewFlex}
       >
         <View style={styles.HeaderContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.pop();
-            }}
-          >
+          <TouchableOpacity onPress={() => navigation.pop()}>
             <GradientBGIcon
               name="left"
               color={COLORS.primaryLightGreyHex}
@@ -100,17 +131,13 @@ const PaymentScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.PaymentOptionsContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setPaymentMode('Credit Card');
-            }}
-          >
+          <TouchableOpacity onPress={() => setPaymentMode('Credit Card')}>
             <View
               style={[
                 styles.CreditCardContainer,
                 {
                   borderColor:
-                    paymentMode == 'Credit Card'
+                    paymentMode === 'Credit Card'
                       ? COLORS.primaryOrangeHex
                       : COLORS.primaryGreyHex,
                 },
@@ -165,9 +192,7 @@ const PaymentScreen = ({ navigation, route }: any) => {
           {PaymentList.map((data: any) => (
             <TouchableOpacity
               key={data.name}
-              onPress={() => {
-                setPaymentMode(data.name);
-              }}
+              onPress={() => setPaymentMode(data.name)}
             >
               <PaymentMethod
                 paymentMode={paymentMode}
@@ -182,8 +207,8 @@ const PaymentScreen = ({ navigation, route }: any) => {
 
       <PaymentFooter
         buttonTitle={`Pay with ${paymentMode}`}
-        price={{ price: route.params.amount, currency: '$' }}
-        buttonPressHandler={buttonPressHandler}
+        price={{ price: route.params.amount.toFixed(2), currency: '$' }}
+        buttonPressHandler={handlePayment}
       />
     </View>
   );

@@ -6,18 +6,16 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import {COLORS, FONTFAMILY, FONTSIZE, SPACING} from '../theme/theme';
+import { COLORS, FONTFAMILY, FONTSIZE, SPACING } from '../theme/theme';
 import OrderItemCard from './OrderItemCard';
 interface OrderHistoryCardProps {
-  navigationHandler: any;
-  CartList: any;
-  CartListPrice: string;
+  details: any;
+  amount: string;
   OrderDate: string;
 }
 const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({
-  navigationHandler,
-  CartList,
-  CartListPrice,
+  details,
+  amount,
   OrderDate,
 }) => {
   return (
@@ -29,27 +27,19 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({
         </View>
         <View style={styles.PriceContainer}>
           <Text style={styles.HeaderTitle}>Total Amount</Text>
-          <Text style={styles.HeaderPrice}>$ {CartListPrice}</Text>
+          <Text style={styles.HeaderPrice}>$ {amount}</Text>
         </View>
       </View>
       <View style={styles.ListContainer}>
-        {CartList.map((data: any, index: any) => (
-          <TouchableOpacity
-            key={index.toString() + data.id}
-            onPress={() => {
-              navigationHandler({
-                index: data.index,
-                id: data.id,
-                type: data.type,
-              });
-            }}>
+        {details.map((data: any, index: any) => (
+          <TouchableOpacity key={index.toString() + data.id}>
             <OrderItemCard
               type={data.type}
               name={data.name}
               imagelink_square={data.imagelink_square}
               special_ingredient={data.special_ingredient}
               prices={data.prices}
-              ItemPrice={data.ItemPrice}
+              ItemPrice={data.itemPrice}
             />
           </TouchableOpacity>
         ))}

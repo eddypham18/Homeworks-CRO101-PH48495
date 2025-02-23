@@ -10,35 +10,32 @@ import {
 } from 'react-native';
 import { COLORS, FONTFAMILY } from '../theme/theme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import api from '../configs/api';
 
 const ResetPassword = ({ navigation }: any) => {
   // email
   const [email, setEmail] = useState('');
-  const [emailIsFocused, setEmailIsFocused] = useState(false);
   const [emailError, setEmailError] = useState(false);
 
-  //  mật khẩu cũ
+  // mật khẩu cũ
   const [oldPasswd, setOldPasswd] = useState('');
-  const [oldPasswdIsFocused, setOldPasswdIsFocused] = useState(false);
   const [oldPasswordVisible, setOldPasswordVisible] = useState(false);
   const [oldPasswordError, setOldPasswordError] = useState(false);
 
   // mật khẩu mới
   const [passwd, setPasswd] = useState('');
-  const [passwdIsFocused, setPasswdIsFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
   // xác nhận mật khẩu
   const [reTypePasswd, setReTypePasswd] = useState('');
-  const [rePasswdIsFocused, setRePasswdIsFocused] = useState(false);
   const [rePasswordVisible, setRePasswordVisible] = useState(false);
   const [rePasswordError, setRePasswordError] = useState(false);
 
   // hiển thị thông báo lỗi
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleRegister = () => {
+  const handleResetPassword = async () => {
     // Reset các trạng thái lỗi
     setEmailError(false);
     setOldPasswordError(false);
@@ -69,7 +66,7 @@ const ResetPassword = ({ navigation }: any) => {
       return;
     }
 
-    // Kiểm tra độ dài mật khẩu mới (ví dụ: ít nhất 6 ký tự)
+    // Kiểm tra độ dài mật khẩu mới (ít nhất 6 ký tự)
     if (passwd.length < 6) {
       setErrorMessage('Password must be at least 6 characters.');
       setPasswordError(true);
@@ -84,28 +81,52 @@ const ResetPassword = ({ navigation }: any) => {
       return;
     }
 
-    // Nếu tất cả validations đều hợp lệ
-    setErrorMessage('');
-    setEmailError(false);
-    setOldPasswordError(false);
-    setPasswordError(false);
-    setRePasswordError(false);
+    try {
+      // Lấy thông tin người dùng theo email
+      const userRes = await api.get(`/users?email=${email}`, {});
+      if (!userRes.data || userRes.data.length === 0) {
+        setErrorMessage('User not found.');
+        setEmailError(true);
+        return;
+      }
+      const user = userRes.data[0];
 
-    navigation.pop(1);
+      // Kiểm tra mật khẩu cũ có khớp với mật khẩu hiện tại của người dùng không
+      if (user.password !== oldPasswd) {
+        setErrorMessage('Old password is incorrect.');
+        setOldPasswordError(true);
+        return;
+      }
+
+      // Cập nhật mật khẩu mới
+      const updateRes = await api.patch(
+        `/users/${user.id}`,
+        { password: passwd },
+        {}
+      );
+      if (updateRes.status === 200) {
+        navigation.navigate('Login');
+      } else {
+        setErrorMessage('Failed to reset password.');
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('An error occurred. Please try again.');
+    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar
         backgroundColor={COLORS.primaryBlackHex}
-        barStyle={'light-content'}
+        barStyle="light-content"
       />
       <Image
         source={require('../assets/app_images/logo_coffee.png')}
         style={{ height: 142, width: 142, marginTop: 40 }}
       />
       <Text style={styles.textWelcome}>Welcome to Lungo !!</Text>
-      <Text style={styles.textContinue}>Reset your account to Continue</Text>
+      <Text style={styles.textContinue}>Reset your account to continue</Text>
 
       {/* Input email */}
       <TextInput
@@ -122,8 +143,6 @@ const ResetPassword = ({ navigation }: any) => {
         placeholderTextColor={COLORS.secondaryLightGreyHex}
         value={email}
         onChangeText={setEmail}
-        onFocus={() => setEmailIsFocused(true)}
-        onBlur={() => setEmailIsFocused(false)}
       />
 
       {/* Input mật khẩu cũ */}
@@ -142,8 +161,6 @@ const ResetPassword = ({ navigation }: any) => {
           placeholderTextColor={COLORS.secondaryLightGreyHex}
           value={oldPasswd}
           onChangeText={setOldPasswd}
-          onFocus={() => setOldPasswdIsFocused(true)}
-          onBlur={() => setOldPasswdIsFocused(false)}
           secureTextEntry={!oldPasswordVisible}
         />
         <TouchableOpacity
@@ -174,8 +191,6 @@ const ResetPassword = ({ navigation }: any) => {
           placeholderTextColor={COLORS.secondaryLightGreyHex}
           value={passwd}
           onChangeText={setPasswd}
-          onFocus={() => setPasswdIsFocused(true)}
-          onBlur={() => setPasswdIsFocused(false)}
           secureTextEntry={!passwordVisible}
         />
         <TouchableOpacity
@@ -206,8 +221,6 @@ const ResetPassword = ({ navigation }: any) => {
           placeholderTextColor={COLORS.secondaryLightGreyHex}
           value={reTypePasswd}
           onChangeText={setReTypePasswd}
-          onFocus={() => setRePasswdIsFocused(true)}
-          onBlur={() => setRePasswdIsFocused(false)}
           secureTextEntry={!rePasswordVisible}
         />
         <TouchableOpacity
@@ -229,16 +242,16 @@ const ResetPassword = ({ navigation }: any) => {
         ) : null}
       </View>
 
-      {/* Button Register */}
+      {/* Button Reset Password */}
       <TouchableOpacity
         style={[styles.styleButton, { marginTop: 40 }]}
-        onPress={handleRegister}
+        onPress={handleResetPassword}
       >
-        <Text style={styles.textButton}>Register</Text>
+        <Text style={styles.textButton}>Reset Password</Text>
       </TouchableOpacity>
 
       <View style={{ flexDirection: 'row', marginTop: 5 }}>
-        <Text style={styles.textFootnote}>You have an account? Click </Text>
+        <Text style={styles.textFootnote}>Remember your password? Click </Text>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.textLink}>Sign in</Text>
         </TouchableOpacity>
