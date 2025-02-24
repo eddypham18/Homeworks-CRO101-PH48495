@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Image,
   StyleSheet,
@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS, FONTFAMILY } from '../theme/theme';
 import api from '../configs/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from 'expo-router';
 
 function Login({ navigation }: any) {
   // Danh sách user
@@ -82,17 +83,19 @@ function Login({ navigation }: any) {
   };
 
   // Gọi API lấy danh sách users
-  useEffect(() => {
-    api
-      .get('/users', {})
-      .then((response: any) => {
-        setUsers(response.data);
-      })
-      .catch((error: any) => {
-        console.log(error);
-        Alert.alert('Error', 'Failed to load users data');
-      });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      api
+        .get('/users', {})
+        .then((response: any) => {
+          setUsers(response.data);
+        })
+        .catch((error: any) => {
+          console.log(error);
+          Alert.alert('Error', 'Failed to load users data');
+        });
+    }, [])
+  );
 
   return (
     <View style={styles.container}>

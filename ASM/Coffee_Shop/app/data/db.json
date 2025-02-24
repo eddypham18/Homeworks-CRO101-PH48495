@@ -29,6 +29,18 @@
       "email": "t1@t.t",
       "password": "123456",
       "id": "c7e5"
+    },
+    {
+      "name": "Thai",
+      "email": "thai@gmail.com",
+      "password": "123123",
+      "id": "f102"
+    },
+    {
+      "name": "thai",
+      "email": "t@t.com",
+      "password": "123123",
+      "id": "1228"
     }
   ],
   "cart": [
@@ -40,6 +52,76 @@
     {
       "id": "c580",
       "userId": "c7e5",
+      "items": [
+        {
+          "productId": "C4",
+          "name": "Black Coffee",
+          "roasted": "Medium Roasted",
+          "imagelink_square": 35,
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 0
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 2
+            }
+          ],
+          "type": "Coffee",
+          "index": 3
+        }
+      ]
+    },
+    {
+      "id": "7ca9",
+      "userId": "f102",
+      "items": [
+        {
+          "productId": "B1",
+          "name": "Robusta Beans",
+          "roasted": "Medium Roasted",
+          "imagelink_square": 25,
+          "special_ingredient": "From Africa",
+          "prices": [
+            {
+              "size": "250gm",
+              "price": "5.50",
+              "currency": "$",
+              "quantity": 0
+            },
+            {
+              "size": "500gm",
+              "price": "10.50",
+              "currency": "$",
+              "quantity": 0
+            },
+            {
+              "size": "1Kg",
+              "price": "18.50",
+              "currency": "$",
+              "quantity": 1
+            }
+          ],
+          "type": "Bean",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "id": "f66b",
+      "userId": "1228",
       "items": []
     }
   ],
@@ -185,6 +267,82 @@
           "itemPrice": 29
         }
       ]
+    },
+    {
+      "id": "2b5e",
+      "userId": "f102",
+      "amount": 8.82,
+      "date": "24th February 2025, 16:36",
+      "status": "completed",
+      "paymentMode": "Wallet",
+      "details": [
+        {
+          "productId": "C1",
+          "name": "Americano",
+          "imagelink_square": 33,
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 1
+            }
+          ],
+          "type": "Coffee",
+          "itemPrice": 8.82
+        }
+      ]
+    },
+    {
+      "id": "5af2",
+      "userId": "1228",
+      "amount": 4.529999999999999,
+      "date": "24th February 2025, 16:56",
+      "status": "completed",
+      "paymentMode": "Wallet",
+      "details": [
+        {
+          "productId": "C4",
+          "name": "Black Coffee",
+          "imagelink_square": 35,
+          "special_ingredient": "With Steamed Milk",
+          "prices": [
+            {
+              "size": "S",
+              "price": "1.38",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "M",
+              "price": "3.15",
+              "currency": "$",
+              "quantity": 1
+            },
+            {
+              "size": "L",
+              "price": "4.29",
+              "currency": "$",
+              "quantity": 0
+            }
+          ],
+          "type": "Coffee",
+          "itemPrice": 4.529999999999999
+        }
+      ]
     }
   ],
   "favorites": [
@@ -193,6 +351,30 @@
       "userId": "U1",
       "productId": "B1",
       "productType": "Bean"
+    },
+    {
+      "id": "c814",
+      "userId": "c7e5",
+      "productId": "C4",
+      "productType": "Coffee"
+    },
+    {
+      "id": "e67d",
+      "userId": "c7e5",
+      "productId": "C1",
+      "productType": "Coffee"
+    },
+    {
+      "id": "f017",
+      "userId": "f102",
+      "productId": "C1",
+      "productType": "Coffee"
+    },
+    {
+      "id": "b42c",
+      "userId": "f102",
+      "productId": "C4",
+      "productType": "Coffee"
     }
   ],
   "beans": [

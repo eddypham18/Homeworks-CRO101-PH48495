@@ -76,7 +76,7 @@ export default function PersonalDetailScreen({ navigation }: any) {
     fillNameAndEmail();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Reset lỗi
     setNameError(false);
     setEmailError(false);
@@ -85,11 +85,18 @@ export default function PersonalDetailScreen({ navigation }: any) {
     setErrorMessage('');
 
     // Kiểm tra nếu trường nào rỗng
-    if (!name.trim() || !email.trim() || !passwd || !reTypePasswd) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !passwd ||
+      !newPasswd ||
+      !reTypePasswd
+    ) {
       setErrorMessage('All fields are required.');
       if (!name.trim()) setNameError(true);
       if (!email.trim()) setEmailError(true);
       if (!passwd) setPasswordError(true);
+      if (!newPasswd) setNewPasswordError(true);
       if (!reTypePasswd) setRePasswordError(true);
       return;
     }
@@ -118,51 +125,45 @@ export default function PersonalDetailScreen({ navigation }: any) {
     }
 
     //Kiểm tra mật khẩu có đúng với tài khoản không
-    const checkPassword = async () => {
-      const data = await getUser();
-      if (data) {
-        if (data.password !== passwd) {
-          setErrorMessage('Password is incorrect.');
-          setPasswordError(true);
-          return;
-        }
-      }
-    };
-    checkPassword();
 
-    // Nếu mọi thứ hợp lệ, xóa thông báo lỗi
-    setErrorMessage('');
+    const data = await getUser();
+    if (data) {
+      if (data.password !== passwd) {
+        setErrorMessage('Password is incorrect.');
+        setPasswordError(true);
+        return;
+      }
+    }
 
     // Gửi dữ liệu lên server
-    const saveData = async () => {
-      const userId = await AsyncStorage.getItem('userId');
-      try {
-        const res = await api.put(
-          `/users/${userId}`,
-          {
-            name,
-            email,
-            password: newPasswd,
-          },
-          {}
-        );
-        if (res) {
-          ToastAndroid.show('Saved successfully', ToastAndroid.SHORT);
-          setPasswd('');
-          setNewPasswd('');
-          setReTypePasswd('');
-          setNameError(false);
-          setNewPasswordError(false);
-          setPasswordError(false);
-          setRePasswordError(false);
 
-          fillNameAndEmail();
-        }
-      } catch (e) {
-        console.log(e);
+    const userId = await AsyncStorage.getItem('userId');
+    try {
+      const res = await api.put(
+        `/users/${userId}`,
+        {
+          name,
+          email,
+          password: newPasswd,
+        },
+        {}
+      );
+      if (res) {
+        ToastAndroid.show('Saved successfully', ToastAndroid.SHORT);
+        setPasswd('');
+        setNewPasswd('');
+        setReTypePasswd('');
+        setNameError(false);
+        setNewPasswordError(false);
+        setPasswordError(false);
+        setRePasswordError(false);
+        setErrorMessage('');
+
+        fillNameAndEmail();
       }
-    };
-    saveData();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
